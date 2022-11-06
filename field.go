@@ -89,6 +89,9 @@ func Duration(key string, val time.Duration) Field {
 }
 
 func Any(key string, value interface{}) Field {
+	if s, ok := value.(Stringer); ok {
+		return zap.String(key, s.LogString())
+	}
 	return zap.Any(key, value)
 }
 

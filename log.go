@@ -19,6 +19,10 @@ func S() *SimpleLogger {
 	return zap.S()
 }
 
+type Stringer interface {
+	LogString() string
+}
+
 func init() {
 	z, err := zap.NewDevelopment()
 	if err != nil {
