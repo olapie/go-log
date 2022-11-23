@@ -6,11 +6,11 @@ import (
 	"go.uber.org/zap"
 )
 
-type Logger = zap.Logger
+type StructuredLogger = zap.Logger
 type SimpleLogger = zap.SugaredLogger
 
 // G returns the global logger
-func G() *Logger {
+func G() *StructuredLogger {
 	return zap.L()
 }
 
