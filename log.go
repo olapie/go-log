@@ -1,9 +1,8 @@
 package log
 
 import (
-	"log"
-
 	"go.uber.org/zap"
+	"log"
 )
 
 type StructuredLogger = zap.Logger
@@ -29,4 +28,13 @@ func init() {
 		log.Fatal(err)
 	}
 	zap.ReplaceGlobals(z)
+}
+
+type Logger interface {
+	Printf(format string, v ...any)
+	Println(v ...any)
+	Fatalf(format string, v ...any)
+	Fatalln(v ...any)
+	Panicf(format string, v ...any)
+	Panicln(v ...any)
 }
