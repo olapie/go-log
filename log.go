@@ -1,8 +1,11 @@
 package log
 
 import (
-	"go.uber.org/zap"
+	"fmt"
 	"log"
+	"os"
+
+	"go.uber.org/zap"
 )
 
 type StructuredLogger = zap.Logger
@@ -28,6 +31,29 @@ func init() {
 		log.Fatal(err)
 	}
 	zap.ReplaceGlobals(z)
+}
+
+// InitLoggerWithoutTime removes time from log as CloudWatch already includes time
+func InitLoggerWithoutTime(development bool) {
+	var config zap.Config
+	if development {
+		encoderConfig := zap.NewDevelopmentEncoderConfig()
+		encoderConfig.EncodeTime = nil
+		config = zap.NewDevelopmentConfig()
+		config.EncoderConfig = encoderConfig
+	} else {
+		encoderConfig := zap.NewProductionEncoderConfig()
+		encoderConfig.EncodeTime = nil
+		config = zap.NewProductionConfig()
+		config.EncoderConfig = encoderConfig
+	}
+
+	logger, err := config.Build()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	zap.ReplaceGlobals(logger)
 }
 
 type Logger interface {
