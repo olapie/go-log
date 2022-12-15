@@ -2,8 +2,10 @@ package log
 
 import (
 	"fmt"
+	"go.uber.org/zap/zapcore"
 	"log"
 	"os"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -38,12 +40,16 @@ func InitLoggerWithoutTime(development bool) {
 	var config zap.Config
 	if development {
 		encoderConfig := zap.NewDevelopmentEncoderConfig()
-		encoderConfig.EncodeTime = nil
+		encoderConfig.EncodeTime = func(time time.Time, encoder zapcore.PrimitiveArrayEncoder) {
+
+		}
 		config = zap.NewDevelopmentConfig()
 		config.EncoderConfig = encoderConfig
 	} else {
 		encoderConfig := zap.NewProductionEncoderConfig()
-		encoderConfig.EncodeTime = nil
+		encoderConfig.EncodeTime = func(time time.Time, encoder zapcore.PrimitiveArrayEncoder) {
+
+		}
 		config = zap.NewProductionConfig()
 		config.EncoderConfig = encoderConfig
 	}
