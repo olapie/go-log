@@ -62,6 +62,8 @@ func InitLoggerWithoutTime(development bool) {
 	zap.ReplaceGlobals(logger)
 }
 
+type Func = func(msg string, fields ...Field)
+
 type Logger interface {
 	Printf(format string, v ...any)
 	Println(v ...any)
