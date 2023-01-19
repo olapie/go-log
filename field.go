@@ -95,6 +95,6 @@ func Any(key string, value interface{}) Field {
 	return zap.Any(key, value)
 }
 
-func Error(err error) Field {
+func Err(err error) Field {
 	return zap.Error(err)
 }
