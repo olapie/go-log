@@ -9,11 +9,10 @@ import (
 )
 
 type Logger = zap.Logger
-type SugaredLogger = zap.SugaredLogger
 
 var globalMu sync.Mutex
 var globalLogger *Logger
-var globalSugaredLogger *SugaredLogger
+var globalSugaredLogger *zap.SugaredLogger
 
 func init() {
 	l, err := zap.NewDevelopment()
@@ -34,11 +33,6 @@ func ReplaceGlobal(l *Logger) {
 // G returns the global logger
 func G() *Logger {
 	return globalLogger
-}
-
-// S returns the global simple logger
-func S() *SugaredLogger {
-	return globalSugaredLogger
 }
 
 type FileEncoding int
