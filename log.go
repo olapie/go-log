@@ -2,12 +2,12 @@ package log
 
 import (
 	"fmt"
-	"go.uber.org/zap/zapcore"
 	"log"
 	"os"
 	"time"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type StructuredLogger = zap.Logger
