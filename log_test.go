@@ -1,22 +1,19 @@
 package log
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestWriteToFile(t *testing.T) {
 	ReplaceGlobal(NewLogger(func(options *Options) {
 		options.Development = true
 		options.ConsoleTimeHidden = true
 		options.Filename = "testdata/test.log"
-	}))
-	Debugln("debug message")
-	Infoln("info message")
-	Errorln("this is another error")
-
-	ReplaceGlobal(NewLogger(func(options *Options) {
+		options.MaxFileSize = 1
 		options.Console = false
-		options.Development = true
-		options.ConsoleTimeHidden = true
-		options.Filename = "testdata/test.log"
 	}))
-	Infoln("only write to file message")
+	for i := 0; i < 1024*1024/16; i++ {
+		Infoln(i, time.Now().String())
+	}
 }
