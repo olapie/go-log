@@ -23,6 +23,9 @@ func init() {
 }
 
 func ReplaceGlobal(l *Logger) {
+	if l == nil {
+		panic("logger is nil")
+	}
 	globalMu.Lock()
 	zap.ReplaceGlobals(l)
 	globalLogger = zap.L()
