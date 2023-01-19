@@ -1,10 +1,11 @@
 package log
 
 import (
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"sync"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type Logger = zap.Logger
@@ -40,14 +41,29 @@ func S() *SugaredLogger {
 	return globalSugaredLogger
 }
 
+type FileEncoding int
+
+const (
+	FileEncodingConsole = iota
+	FileEncodingJSON
+)
+
 type Options struct {
-	Development bool
-	TimeHidden  bool
-	Filename    string
+	Development       bool
+	ConsoleTimeHidden bool
+	Filename          string
+	FileEncoder       FileEncoding
+	MaxFileSize       int // megabytes
+	MaxFileAge        int // days
+	MaxFileBackups    int
 }
 
 func NewLogger(optFns ...func(*Options)) *Logger {
-	options := &Options{}
+	options := &Options{
+		MaxFileSize:    256, // 256MB
+		MaxFileAge:     14,  // 14 days
+		MaxFileBackups: 32,
+	}
 	for _, fn := range optFns {
 		fn(options)
 	}
@@ -60,21 +76,21 @@ func NewLogger(optFns ...func(*Options)) *Logger {
 		config = zap.NewProductionConfig()
 	}
 
-	var encoderConfig zapcore.EncoderConfig
-	if options.Development {
-		encoderConfig = zap.NewDevelopmentEncoderConfig()
-	} else {
-		encoderConfig = zap.NewProductionEncoderConfig()
-	}
-
-	if options.TimeHidden {
-		encoderConfig.EncodeTime = func(time time.Time, encoder zapcore.PrimitiveArrayEncoder) {}
-		config.EncoderConfig = encoderConfig
+	if options.ConsoleTimeHidden {
+		config.EncoderConfig.EncodeTime = func(time time.Time, encoder zapcore.PrimitiveArrayEncoder) {}
 	}
 
 	if options.Filename != "" {
 		writer := NewFileWriter(options.Filename)
-		encoder := zapcore.NewJSONEncoder(encoderConfig)
+		writer.ll.MaxSize = options.MaxFileSize
+		writer.ll.MaxAge = options.MaxFileAge
+		writer.ll.MaxBackups = options.MaxFileBackups
+		var encoder zapcore.Encoder
+		if options.FileEncoder == FileEncodingJSON {
+			encoder = zapcore.NewJSONEncoder(config.EncoderConfig)
+		} else {
+			encoder = zapcore.NewConsoleEncoder(config.EncoderConfig)
+		}
 		zapOptions = append(zapOptions, zap.WrapCore(func(core zapcore.Core) zapcore.Core {
 			return zapcore.NewTee(
 				core,
