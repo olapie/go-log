@@ -51,6 +51,7 @@ const (
 type Options struct {
 	Development       bool
 	ConsoleTimeHidden bool
+	Console           bool // output to console
 	Filename          string
 	FileEncoder       FileEncoding
 	MaxFileSize       int // megabytes
@@ -60,6 +61,7 @@ type Options struct {
 
 func NewLogger(optFns ...func(*Options)) *Logger {
 	options := &Options{
+		Console:        true,
 		MaxFileSize:    256, // 256MB
 		MaxFileAge:     14,  // 14 days
 		MaxFileBackups: 32,
@@ -92,10 +94,12 @@ func NewLogger(optFns ...func(*Options)) *Logger {
 			encoder = zapcore.NewConsoleEncoder(config.EncoderConfig)
 		}
 		zapOptions = append(zapOptions, zap.WrapCore(func(core zapcore.Core) zapcore.Core {
-			return zapcore.NewTee(
-				core,
-				zapcore.NewCore(encoder, zapcore.AddSync(writer), config.Level),
-			)
+			fileCore := zapcore.NewCore(encoder, zapcore.AddSync(writer), config.Level)
+			if options.Console {
+				return zapcore.NewTee(core, fileCore)
+			} else {
+				return fileCore
+			}
 		}))
 	}
 
