@@ -43,8 +43,8 @@ func G() *Logger {
 type FileEncoding int
 
 const (
-	FileEncodingConsole = iota
-	FileEncodingJSON
+	FileEncodingJSON = iota
+	FileEncodingConsole
 )
 
 type Options struct {
@@ -87,10 +87,10 @@ func NewLogger(optFns ...func(*Options)) *Logger {
 		writer.ll.MaxAge = options.MaxFileAge
 		writer.ll.MaxBackups = options.MaxFileBackups
 		var encoder zapcore.Encoder
-		if options.FileEncoder == FileEncodingJSON {
-			encoder = zapcore.NewJSONEncoder(config.EncoderConfig)
-		} else {
+		if options.FileEncoder == FileEncodingConsole {
 			encoder = zapcore.NewConsoleEncoder(config.EncoderConfig)
+		} else {
+			encoder = zapcore.NewJSONEncoder(config.EncoderConfig)
 		}
 		zapOptions = append(zapOptions, zap.WrapCore(func(core zapcore.Core) zapcore.Core {
 			fileCore := zapcore.NewCore(encoder, zapcore.AddSync(writer), config.Level)
