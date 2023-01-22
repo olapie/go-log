@@ -13,6 +13,7 @@ type Logger = zap.Logger
 var globalMu sync.Mutex
 var globalLogger *Logger
 var globalSugaredLogger *zap.SugaredLogger
+var globalSugaredLogger2 *zap.SugaredLogger
 
 func init() {
 	l, err := zap.NewDevelopment()
@@ -30,6 +31,7 @@ func ReplaceGlobal(l *Logger) {
 	zap.ReplaceGlobals(l)
 	globalLogger = zap.L()
 	globalSugaredLogger = zap.S()
+	globalSugaredLogger2 = zap.S().WithOptions(zap.AddCallerSkip(1))
 	globalMu.Unlock()
 }
 
@@ -123,49 +125,49 @@ type StdLogger interface {
 }
 
 func Debugln(args ...interface{}) {
-	globalSugaredLogger.Debugln(args...)
+	globalSugaredLogger2.Debugln(args...)
 }
 
 func Infoln(args ...interface{}) {
-	globalSugaredLogger.Infoln(args...)
+	globalSugaredLogger2.Infoln(args...)
 }
 
 func Warnln(args ...interface{}) {
-	globalSugaredLogger.Warnln(args...)
+	globalSugaredLogger2.Warnln(args...)
 }
 
 func Errorln(args ...interface{}) {
-	globalSugaredLogger.Errorln(args...)
+	globalSugaredLogger2.Errorln(args...)
 }
 
 func Panicln(args ...interface{}) {
-	globalSugaredLogger.Panicln(args...)
+	globalSugaredLogger2.Panicln(args...)
 }
 
 func Fatalln(args ...interface{}) {
-	globalSugaredLogger.Fatalln(args...)
+	globalSugaredLogger2.Fatalln(args...)
 }
 
 func Debugf(template string, args ...interface{}) {
-	globalSugaredLogger.Debugf(template, args...)
+	globalSugaredLogger2.Debugf(template, args...)
 }
 
 func Infof(template string, args ...interface{}) {
-	globalSugaredLogger.Infof(template, args...)
+	globalSugaredLogger2.Infof(template, args...)
 }
 
 func Warnf(template string, args ...interface{}) {
-	globalSugaredLogger.Warnf(template, args...)
+	globalSugaredLogger2.Warnf(template, args...)
 }
 
 func Errorf(template string, args ...interface{}) {
-	globalSugaredLogger.Errorf(template, args...)
+	globalSugaredLogger2.Errorf(template, args...)
 }
 
 func Panicf(template string, args ...interface{}) {
-	globalSugaredLogger.Panicf(template, args...)
+	globalSugaredLogger2.Panicf(template, args...)
 }
 
 func Fatalf(template string, args ...interface{}) {
-	globalSugaredLogger.Fatalf(template, args...)
+	globalSugaredLogger2.Fatalf(template, args...)
 }
