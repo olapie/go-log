@@ -1,33 +1,50 @@
 package log
 
 import (
+	"github.com/natefinch/lumberjack/v3"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"gopkg.in/natefinch/lumberjack.v2"
+	"time"
 )
 
 var _ io.WriteCloser = (*FileWriter)(nil)
 
-type FileWriter struct {
-	ll *lumberjack.Logger
+type FileWriterOptions struct {
+	lumberjack.Options
+	MaxSize int64
 }
 
-func NewFileWriter(filename string) *FileWriter {
+type FileWriter struct {
+	ll *lumberjack.Roller
+}
+
+func NewFileWriter(filename string, optFns ...func(options *FileWriterOptions)) *FileWriter {
 	filename = strings.TrimSpace(filename)
 	if filename == "" {
 		filename = filepath.Join(os.Args[0], "log")
 	}
 
-	ll := &lumberjack.Logger{
-		Filename:   filename,
-		MaxSize:    512, // 512 megabytes
-		MaxAge:     30,  // 30 days
-		MaxBackups: 32,
-		LocalTime:  true,
-		Compress:   true,
+	opts := &FileWriterOptions{
+		Options: lumberjack.Options{
+			MaxBackups: 32,
+			MaxAge:     30 * time.Hour * 24, // 28 days
+			LocalTime:  false,
+			Compress:   true,
+		},
+		MaxSize: 512 * 1024 * 1024,
+	}
+
+	for _, fn := range optFns {
+		fn(opts)
+	}
+
+	ll, err := lumberjack.NewRoller(filename, opts.MaxSize, &opts.Options)
+
+	if err != nil {
+		log.Fatalln(err)
 	}
 
 	return &FileWriter{
@@ -35,22 +52,10 @@ func NewFileWriter(filename string) *FileWriter {
 	}
 }
 
-func (f FileWriter) Close() error {
+func (f *FileWriter) Close() error {
 	return f.ll.Close()
 }
 
-func (f FileWriter) Write(p []byte) (n int, err error) {
+func (f *FileWriter) Write(p []byte) (n int, err error) {
 	return f.ll.Write(p)
-}
-
-func (f *FileWriter) SetMaxSize(sizeInMB int) {
-	f.ll.MaxSize = sizeInMB
-}
-
-func (f *FileWriter) SetMaxAge(days int) {
-	f.ll.MaxAge = days
-}
-
-func (f *FileWriter) SetMaxBackups(n int) {
-	f.ll.MaxBackups = n
 }

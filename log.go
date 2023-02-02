@@ -82,10 +82,11 @@ func NewLogger(optFns ...func(*Options)) *Logger {
 	}
 
 	if options.Filename != "" {
-		writer := NewFileWriter(options.Filename)
-		writer.ll.MaxSize = options.MaxFileSize
-		writer.ll.MaxAge = options.MaxFileAge
-		writer.ll.MaxBackups = options.MaxFileBackups
+		writer := NewFileWriter(options.Filename, func(opts *FileWriterOptions) {
+			opts.MaxSize = int64(options.MaxFileSize) * 1024 * 1024
+			opts.MaxAge = time.Hour * 24 * time.Duration(options.MaxFileAge)
+			opts.MaxBackups = options.MaxFileBackups
+		})
 		var encoder zapcore.Encoder
 		if options.FileEncoder == FileEncodingConsole {
 			encoder = zapcore.NewConsoleEncoder(config.EncoderConfig)
