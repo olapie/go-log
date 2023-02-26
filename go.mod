@@ -1,4 +1,4 @@
-module golang.olapie.com/log
+module go.olapie.com/log
 
 go 1.19
 
